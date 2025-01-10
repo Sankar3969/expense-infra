@@ -48,7 +48,10 @@ pipeline {
              when {
                 expression { params.ACTION == 'Apply' }
             }
+            steps{
                 build job: '20-sg', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+            }
+                
         }
         // stage('Deploy') {
         //     when {     
