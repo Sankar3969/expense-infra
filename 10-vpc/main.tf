@@ -1,5 +1,6 @@
 module "vpc" {
-  source           = "git::https://github.com/Sankar3969/vpc_creation.git?ref=main"
+ source = "git::https://github.com/Sankar3969/vpc_creation.git?ref=main"
+  #source           = "D:/devops/repos/Terraform_Topics/vpc_creation"
   cidr_block       = var.cidr_block
   instance_tenancy = var.instance_tenancy
   int_gtw_tag      = var.int_gtw_tag
