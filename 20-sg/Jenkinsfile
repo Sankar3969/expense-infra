@@ -57,6 +57,15 @@ pipeline {
         }
      stage ('parlell in sequential ') {
             parallel {
+            stage ('bastion') {
+                when {
+                     expression { params.ACTION == 'Apply' }
+                }
+                 steps {
+                     build job: '30-bastion', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                }
+              
+               }
              stage ('EKS') {
                 when {
                      expression { params.ACTION == 'Apply' }
