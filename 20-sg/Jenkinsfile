@@ -51,9 +51,22 @@ pipeline {
                 expression { params.ACTION == 'Destroy' }
             }
             steps{
-                     build job: '10-vpc', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+                     build job: '30-bastion', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
             }
               
+        }
+     stage ('parlell in sequential ') {
+            parallel {
+             stage ('EKS') {
+                when {
+                     expression { params.ACTION == 'Apply' }
+                }
+                 steps {
+                     build job: '40-eks', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                }
+              
+               }
+            }
         }
 
         }
