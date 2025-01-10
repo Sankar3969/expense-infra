@@ -1,0 +1,71 @@
+pipeline {
+    agent {
+        lable 'AGENT-1' 
+    }
+    options{
+         timeout(time: 10, unit: 'MINUTES')
+         disableConcurrentBuilds()
+    }
+    parameters {
+        choice(name: 'ACTION', choices: ['Apply', 'Destroy'], description: 'Pick something') 
+    }
+    stages {
+        stage('init and Plan') {
+            steps {
+                withCredentials(region:'us-east-1', credentials: "aws-configure") {
+
+                sh """
+                cd 10-vpc
+                terraform init -reconfigure
+                terraform plan -out=tfplan 
+                """
+                }
+            }
+        }
+        stage('Apply or Destroy') {
+              input {
+                message "Should we continue?"
+                ok "Yes, we should."
+              }
+            steps {
+                 withCredentials(region:'us-east-1', credentials: "aws-configure") {
+                sh """
+                cd 10-vpc
+                if [${param.ACTION} == 'Apply' ]
+                then
+                terraform apply -auto-approve
+                elif [ ${param.ACTION} == 'Destroy' ]
+                then
+                terraform destroy -auto-approve
+                fi
+
+                """
+                 }
+            }
+        }
+        // stage('Deploy') {
+        //     when {     
+        //          expression {
+        //            env.GIT_BRANCH = 'origin/main'  
+        //         }
+        //     }
+        //     steps {
+        //          sh "echo this is Deploy stage1"
+        //     }
+        // }
+        
+    }
+    
+    post {
+        always{
+            echo " this is always block  "
+            deleteDir()
+        }
+        success{
+            echo " this is success block  "
+        }
+        failure{
+            echo " this is failure block  "
+        }
+    }
+}
