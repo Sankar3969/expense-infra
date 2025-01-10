@@ -1,5 +1,5 @@
 module "mysql_sg" {
-   source          = "D:/devops/repos/Terraform_Topics/Terraform/aws_sg_group"
+   source          = "git::https://github.com/Sankar3969/aws_sg_group.git?ref=main"
    Environment     = var.Environment
    sg_type         = var.mysql
    sg_tags         = var.mysql_tags
@@ -8,7 +8,7 @@ module "mysql_sg" {
 }
 
 module "bastion_sg" {
-   source          = "D:/devops/repos/Terraform_Topics/Terraform/aws_sg_group"
+   source          = "git::https://github.com/Sankar3969/aws_sg_group.git?ref=main"
    Environment     = var.Environment
    sg_type         = var.bastion
    sg_tags         = var.bastion_tags
@@ -18,7 +18,7 @@ module "bastion_sg" {
 
 # Node SG
 module "Node_sg" {
-   source          = "D:/devops/repos/Terraform_Topics/Terraform/aws_sg_group"
+   source          = "git::https://github.com/Sankar3969/aws_sg_group.git?ref=main"
    Environment     = var.Environment
    sg_type         = var.Node
    sg_tags         = var.Node_tags
@@ -27,7 +27,7 @@ module "Node_sg" {
 }
 # Controle plane  SG
 module "Controle_Plane_sg" {
-   source          = "D:/devops/repos/Terraform_Topics/Terraform/aws_sg_group"
+   source          = "git::https://github.com/Sankar3969/aws_sg_group.git?ref=main"
    Environment     = var.Environment
    sg_type         = var.Control_plane
    sg_tags         = var.Control_plane_tags
@@ -35,7 +35,7 @@ module "Controle_Plane_sg" {
    vpc_id          = data.aws_ssm_parameter.vpc_id.value #module.vpc.vpc
 }
 module "Ingress_Alb_sg" {
-   source          = "D:/devops/repos/Terraform_Topics/Terraform/aws_sg_group"
+   source          = "git::https://github.com/Sankar3969/aws_sg_group.git?ref=main"
    Environment     = var.Environment
    sg_type         = var.Ingressalb
    sg_tags         = var.Ingressalb_tags
