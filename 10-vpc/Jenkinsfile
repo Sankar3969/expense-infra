@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        lable 'AGENT-1' 
+        label 'AGENT-1' 
     }
     options{
          timeout(time: 10, unit: 'MINUTES')
@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('init and Plan') {
             steps {
-                withCredentials(region:'us-east-1', credentials: "aws-configure") {
+                withAWS(region:'us-east-1', credentials: "aws-configure") {
 
                 sh """
                 cd 10-vpc
@@ -28,7 +28,7 @@ pipeline {
                 ok "Yes, we should."
               }
             steps {
-                 withCredentials(region:'us-east-1', credentials: "aws-configure") {
+                 withAWS(region:'us-east-1', credentials: "aws-configure") {
                 sh """
                 cd 10-vpc
                 if [${param.ACTION} == 'Apply' ]
