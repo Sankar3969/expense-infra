@@ -56,9 +56,7 @@ pipeline {
               
         }
      stage ('parlell-1') {
-        steps {
-                     sh "sleep "
-                }
+        
             parallel {
             stage ('bastion') {
                 when {
