@@ -1,0 +1,117 @@
+pipeline {
+    agent {
+        label 'AGENT-1' 
+    }
+    options{
+         timeout(time: 30, unit: 'MINUTES')
+         disableConcurrentBuilds()
+         ansiColor('xterm')
+    }
+    parameters {
+        choice(name: 'ACTION', choices: ['Apply', 'Destroy'], description: 'Pick something') 
+    }
+    stages {
+        stage('init and Plan') {
+            steps {
+                withAWS(region:'us-east-1', credentials: "aws-configure") {
+
+                sh """
+                cd 80-cdn
+                terraform init -reconfigure
+                terraform plan -out=tfplan 
+                """
+                }
+            }
+        }
+        stage('Apply or Destroy') {
+            //   input {
+            //     message "Should we continue?"
+            //     ok "Yes, we should."
+            //   }
+            steps {
+                 withAWS(region:'us-east-1', credentials: "aws-configure") {
+                sh """
+                cd 80-cdn
+                if [ ${params.ACTION} == 'Apply' ]
+                then
+                terraform apply -auto-approve tfplan
+                elif [ ${params.ACTION} == 'Destroy' ]
+                then
+                terraform destroy -auto-approve
+                fi
+
+                """
+                 }
+            }
+        }
+         stage ('sequential-destroy') {
+                when {
+                        expression { params.ACTION == 'Destroy' }
+                    }
+                steps {
+                    script {
+                        withAWS(region:'us-east-1', credentials: "aws-configure") 
+                         def directories = ['80-cdn', '70-ecr', '60-alb', '50-acm', '40-eks', '30-bastion', '20-sg', '10-vpc']
+                          for (dir in directories) {
+                            echo "Destroying resources in directory: ${dir}"
+                            sh """
+                            cd ${dir}
+                            terraform init -reconfigure
+                            terraform destroy -auto-approve || { echo "Failed to destroy resources in ${dir}"; exit 1; }
+                            cd ..
+                            """
+                        }
+                    }
+                }
+            //     stages{
+            //       stage ('CDN') {
+            //         steps {
+            //             build job: '80-cdn', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+            //         }
+            //      }
+            //      stage ('ECR') {
+            //         steps {
+            //             build job: '70-ecr', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+            //         }
+            //      }
+            //      stage ('ALB') {
+            //         steps {
+            //             build job: '60-alb', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+            //         }
+            //      }
+            //      stage ('ACM') {
+            //         steps {
+            //             build job: '50-acm', parameters: [string(name: 'ACTION', value: "Destroy")], wait: false
+            //         }
+            //      }
+            //    }
+                
+            }
+
+        }
+        // stage('Deploy') {
+        //     when {     
+        //          expression {
+        //            env.GIT_BRANCH = 'origin/main'  
+        //         }
+        //     }
+        //     steps {
+        //          sh "echo this is Deploy stage1"
+        //     }
+        // }
+        
+    
+    
+    post {
+        always{
+            echo " this is always block  "
+            deleteDir()
+        }
+        success{
+            echo " this is success block  "
+        }
+        failure{
+            echo " this is failure block  "
+        }
+    }
+}

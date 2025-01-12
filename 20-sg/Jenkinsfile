@@ -55,7 +55,7 @@ pipeline {
             }
               
         }
-     stage ('parlell in sequential ') {
+     stage ('parlell-1') {
             parallel {
             stage ('bastion') {
                 when {
@@ -75,6 +75,38 @@ pipeline {
                 }
               
                }
+                stage ('ECR') {
+                when {
+                     expression { params.ACTION == 'Apply' }
+                }
+                 steps {
+                     build job: '70-ecr', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                }
+              
+               }
+            }
+            stage ('sequential') {
+                when {
+                        expression { params.ACTION == 'Apply' }
+                    }
+                stages{
+                  stage ('ACM') {
+                    steps {
+                        build job: '50-acm', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                    }
+                 }
+                 stage ('ALB') {
+                    steps {
+                        build job: '60-alb', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                    }
+                 }
+                 stage ('CDN') {
+                    steps {
+                        build job: '80-cdn', parameters: [string(name: 'ACTION', value: "Apply")], wait: false
+                    }
+                 }
+               }
+                
             }
         }
 
