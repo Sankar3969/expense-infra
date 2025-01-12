@@ -56,9 +56,9 @@ pipeline {
               
         }
      stage ('parlell-1') {
-        when {
-                expression { params.ACTION == 'apply' }
-            }
+        steps {
+                     sh "sleep "
+                }
             parallel {
             stage ('bastion') {
                 when {
